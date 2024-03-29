@@ -258,6 +258,7 @@ ColorPicker(
                           onColorChanged: widget.onColorChanged,
                           enableAlpha: _enableAlpha2,
                           displayThumbColor: _displayThumbColor2,
+                          disable: false,
                         ),
                       ),
                     );

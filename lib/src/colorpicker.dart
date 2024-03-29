@@ -2,6 +2,8 @@
 ///
 /// You can create your own layout by importing `picker.dart`.
 
+// ignore_for_file: library_private_types_in_public_api
+
 library hsv_picker;
 
 import 'package:flutter/material.dart';
@@ -654,6 +656,7 @@ class HueRingPicker extends StatefulWidget {
     this.enableAlpha = false,
     this.displayThumbColor = true,
     this.pickerAreaBorderRadius = const BorderRadius.all(Radius.zero),
+    this.disable = false,
   }) : super(key: key);
 
   final Color pickerColor;
@@ -664,6 +667,7 @@ class HueRingPicker extends StatefulWidget {
   final bool enableAlpha;
   final bool displayThumbColor;
   final BorderRadius pickerAreaBorderRadius;
+  final bool disable;
 
   @override
   _HueRingPickerState createState() => _HueRingPickerState();
@@ -691,126 +695,131 @@ class _HueRingPickerState extends State<HueRingPicker> {
 
   @override
   Widget build(BuildContext context) {
-    if (MediaQuery.of(context).orientation == Orientation.portrait || widget.portraitOnly) {
-      return Column(
-        children: <Widget>[
-          ClipRRect(
-            borderRadius: widget.pickerAreaBorderRadius,
-            child: Padding(
-              padding: const EdgeInsets.all(15),
-              child: Stack(alignment: AlignmentDirectional.center, children: <Widget>[
-                SizedBox(
-                  width: widget.colorPickerHeight,
-                  height: widget.colorPickerHeight,
-                  child: ColorPickerHueRing(
-                    currentHsvColor,
-                    onColorChanging,
-                    displayThumbColor: widget.displayThumbColor,
-                    strokeWidth: widget.hueRingStrokeWidth,
-                  ),
-                ),
-                SizedBox(
-                  width: widget.colorPickerHeight / 1.6,
-                  height: widget.colorPickerHeight / 1.6,
-                  child: ColorPickerArea(currentHsvColor, onColorChanging, PaletteType.hsv),
-                )
-              ]),
-            ),
-          ),
-          if (widget.enableAlpha)
-            SizedBox(
-              height: 40.0,
-              width: widget.colorPickerHeight,
-              child: ColorPickerSlider(
-                TrackType.alpha,
-                currentHsvColor,
-                onColorChanging,
-                displayThumbColor: widget.displayThumbColor,
-              ),
-            ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(15.0, 5.0, 10.0, 5.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                const SizedBox(width: 10),
-                ColorIndicator(currentHsvColor),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 5, 0, 20),
-                    child: ColorPickerInput(
-                      currentHsvColor.toColor(),
-                      (Color color) {
-                        setState(() => currentHsvColor = HSVColor.fromColor(color));
-                        widget.onColorChanged(currentHsvColor.toColor());
-                      },
-                      enableAlpha: widget.enableAlpha,
-                      embeddedText: true,
+    return IgnorePointer(
+      ignoring: widget.disable,
+      child: ColorFiltered(
+        colorFilter: widget.disable
+            ? const ColorFilter.mode(Colors.white, BlendMode.saturation)
+            : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
+        child: MediaQuery.of(context).orientation == Orientation.portrait || widget.portraitOnly 
+                ? Column(
+                  children: <Widget>[
+                    ClipRRect(
+                      borderRadius: widget.pickerAreaBorderRadius,
+                      child: Padding(
+                        padding: const EdgeInsets.all(15),
+                        child: Stack(alignment: AlignmentDirectional.center, children: <Widget>[
+                          SizedBox(
+                            width: widget.colorPickerHeight,
+                            height: widget.colorPickerHeight,
+                            child: ColorPickerHueRing(
+                              currentHsvColor,
+                              onColorChanging,
+                              displayThumbColor: widget.displayThumbColor,
+                              strokeWidth: widget.hueRingStrokeWidth,
+                            ),
+                          ),
+                          SizedBox(
+                            width: widget.colorPickerHeight / 1.6,
+                            height: widget.colorPickerHeight / 1.6,
+                            child: ColorPickerArea(currentHsvColor, onColorChanging, PaletteType.hsv),
+                          )
+                        ]),
+                      ),
                     ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      );
-    } else {
-      return Row(
-        children: <Widget>[
-          Expanded(
-            child: SizedBox(
-              width: 300.0,
-              height: widget.colorPickerHeight,
-              child: ClipRRect(
-                borderRadius: widget.pickerAreaBorderRadius,
-                child: ColorPickerArea(currentHsvColor, onColorChanging, PaletteType.hsv),
-              ),
-            ),
-          ),
-          ClipRRect(
-            borderRadius: widget.pickerAreaBorderRadius,
-            child: Padding(
-              padding: const EdgeInsets.all(15),
-              child: Stack(alignment: AlignmentDirectional.topCenter, children: <Widget>[
-                SizedBox(
-                  width: widget.colorPickerHeight - widget.hueRingStrokeWidth * 2,
-                  height: widget.colorPickerHeight - widget.hueRingStrokeWidth * 2,
-                  child: ColorPickerHueRing(currentHsvColor, onColorChanging, strokeWidth: widget.hueRingStrokeWidth),
-                ),
-                Column(
-                  children: [
-                    SizedBox(height: widget.colorPickerHeight / 8.5),
-                    ColorIndicator(currentHsvColor),
-                    const SizedBox(height: 10),
-                    ColorPickerInput(
-                      currentHsvColor.toColor(),
-                      (Color color) {
-                        setState(() => currentHsvColor = HSVColor.fromColor(color));
-                        widget.onColorChanged(currentHsvColor.toColor());
-                      },
-                      enableAlpha: widget.enableAlpha,
-                      embeddedText: true,
-                      disable: true,
-                    ),
-                    if (widget.enableAlpha) const SizedBox(height: 5),
                     if (widget.enableAlpha)
                       SizedBox(
                         height: 40.0,
-                        width: (widget.colorPickerHeight - widget.hueRingStrokeWidth * 2) / 2,
+                        width: widget.colorPickerHeight,
                         child: ColorPickerSlider(
                           TrackType.alpha,
                           currentHsvColor,
                           onColorChanging,
-                          displayThumbColor: true,
+                          displayThumbColor: widget.displayThumbColor,
                         ),
                       ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(15.0, 5.0, 10.0, 5.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          const SizedBox(width: 10),
+                          ColorIndicator(currentHsvColor),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 5, 0, 20),
+                              child: ColorPickerInput(
+                                currentHsvColor.toColor(),
+                                (Color color) {
+                                  setState(() => currentHsvColor = HSVColor.fromColor(color));
+                                  widget.onColorChanged(currentHsvColor.toColor());
+                                },
+                                enableAlpha: widget.enableAlpha,
+                                embeddedText: true,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
-                ),
-              ]),
-            ),
-          ),
-        ],
-      );
-    }
+                ) : Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: SizedBox(
+                            width: 300.0,
+                            height: widget.colorPickerHeight,
+                            child: ClipRRect(
+                              borderRadius: widget.pickerAreaBorderRadius,
+                              child: ColorPickerArea(currentHsvColor, onColorChanging, PaletteType.hsv),
+                            ),
+                          ),
+                        ),
+                        ClipRRect(
+                          borderRadius: widget.pickerAreaBorderRadius,
+                          child: Padding(
+                            padding: const EdgeInsets.all(15),
+                            child: Stack(alignment: AlignmentDirectional.topCenter, children: <Widget>[
+                              SizedBox(
+                                width: widget.colorPickerHeight - widget.hueRingStrokeWidth * 2,
+                                height: widget.colorPickerHeight - widget.hueRingStrokeWidth * 2,
+                                child: ColorPickerHueRing(currentHsvColor, onColorChanging, strokeWidth: widget.hueRingStrokeWidth),
+                              ),
+                              Column(
+                                children: [
+                                  SizedBox(height: widget.colorPickerHeight / 8.5),
+                                  ColorIndicator(currentHsvColor),
+                                  const SizedBox(height: 10),
+                                  ColorPickerInput(
+                                    currentHsvColor.toColor(),
+                                    (Color color) {
+                                      setState(() => currentHsvColor = HSVColor.fromColor(color));
+                                      widget.onColorChanged(currentHsvColor.toColor());
+                                    },
+                                    enableAlpha: widget.enableAlpha,
+                                    embeddedText: true,
+                                    disable: true,
+                                  ),
+                                  if (widget.enableAlpha) const SizedBox(height: 5),
+                                  if (widget.enableAlpha)
+                                    SizedBox(
+                                      height: 40.0,
+                                      width: (widget.colorPickerHeight - widget.hueRingStrokeWidth * 2) / 2,
+                                      child: ColorPickerSlider(
+                                        TrackType.alpha,
+                                        currentHsvColor,
+                                        onColorChanging,
+                                        displayThumbColor: true,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ]),
+                          ),
+                        ),
+                      ],
+        ),
+      )
+    );
   }
 }
